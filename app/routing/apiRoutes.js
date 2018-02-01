@@ -1,82 +1,63 @@
-var express = require('express');
-var router = express.Router();
-var path = require("path");
+var path = require('path');
+var friends = require ('../data/friends.js')
 
-router.use(function timeLog (req, res, next) {
-  console.log('Time: ', Date.now());
-  next();
-});
-
-var friends = require("../data/friends");
-
-router.get("/api/friends", function (req, res) {
-
-	res.json(friends);
-
-});
-
-router.post("/api/friends", function (req, res) {
-
-	var newFriend = req.body;
-
-	friends.push(newFriend);
-
-	var match = compareFriends();
-
-	res.json(match);
+module.exports = function(app){
 
 
+    app.get('/api/survey', function(req, res){
+        res.json(friends);
+    });
+
+    app.post('/api/survey', function(req, res){
+        
+
+        console.log(req.body.name);
+        console.log(req.body.scores.length);
+
+        var match = {};
+        
+        var differenceToBeat = 100;
+
+        for (var i = 0; i < friends.length; i++) {
+
+            var differenceArray = [];
+            var totalDifference = 0;
 
 
-});
+            for (var j = 0; j < friends[i].scores.length; j++) {
 
-function compareFriends() {
-	var compareDiff = 500;
-	var compareScore = [];
-	var totalDiff = 0;
-	var newDiff = 0;
-	var matchIndex = 0;
+                differenceArray.push( Math.abs( req.body.scores[j] - friends[i].scores[j] ) );
+
+            };
+
+            console.log(differenceArray)
+
+            for (var k = 0; k < differenceArray.length; k++) {
+                totalDifference += differenceArray[k];
+            }
+
+            console.log(totalDifference)
+            
+
+            if (match == {}) {
+                match = friends[i];
+                differenceToBeat = totalDifference;
+            } else if ( totalDifference < differenceToBeat ) {
+                match = friends[i];
+                differenceToBeat = totalDifference;
+            }
+
+            console.log(differenceToBeat)
+
+        }
 
 
-	//Grab scores of current user.
-	var currentIndex = friends.length - 1;
-	var currentScore = friends[currentIndex].scores;
+        console.log('Your match is: ' + match.name)
 
-	//Go through array of friends (not including current user...
-	for (var i = 0; i < currentIndex; i++) {
+       
+        friends.push(req.body)
+        res.json(match)
 
-		//Set variables to 0 for new comparison.
-		totalDiff = 0;
-		newDiff = 0;
+    });
 
-		//Set compared score to a variable.
-		compareScore = friends[i].scores;
-
-		//compares score of current user to the score of the friend in the array.
-		for (var ind = 0; ind < compareScore.length; ind++) {
-
-			var num1 = currentScore[ind];
-			var num2 = compareScore[ind];
-
-			if (num1 > num2) {
-				totalDiff = num1 - num2;
-			}
-			else {
-				totalDiff = num2 - num1;
-			};
-
-			newDiff = newDiff + totalDiff;
-
-		};
-
-		if (newDiff < compareDiff) {
-			compareDiff = newDiff;
-			matchIndex = i;
-		};
-	};
-
-	return friends[matchIndex];
-
-};
-
-module.exports = router;
+}

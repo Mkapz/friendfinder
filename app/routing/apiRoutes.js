@@ -26,6 +26,8 @@ module.exports = function(app){
 
             for (var j = 0; j < friends[i].scores.length; j++) {
 
+
+                //absolute value of the two scores 
                 differenceArray.push( Math.abs( req.body.scores[j] - friends[i].scores[j] ) );
 
             };
